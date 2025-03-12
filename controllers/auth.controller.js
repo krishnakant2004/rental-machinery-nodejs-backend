@@ -6,15 +6,15 @@ exports.register = async (req, res) => {
     try {
         const { email, password, phone, name, roles } = req.body;
 
+        // Validate required fields
+        if (!email || !password || !phone || !name) {
+            return res.status(400).json({ message: 'All fields are required' });
+        }
+
         // Check if user already exists
         const existingUser = await User.findOne({ email });
         if (existingUser) {
             return res.status(400).json({ message: 'Email already registered' });
-        }
-
-        // Validate required fields
-        if (!email || !password || !phone || !name) {
-            return res.status(400).json({ message: 'All fields are required' });
         }
 
         // Validate phone number format
@@ -57,6 +57,7 @@ exports.register = async (req, res) => {
         const userObject = user.toObject();
         delete userObject.password;
 
+        // <---send necessary things rather than full user object---->
         res.status(201).json({ user: userObject, token });
     } catch (error) {
         console.log(error.message);
@@ -95,6 +96,7 @@ exports.login = async (req, res) => {
         res.status(400).json({ message: error.message });
     }
 };
+
 
 exports.getProfile = async (req, res) => {
     try {
