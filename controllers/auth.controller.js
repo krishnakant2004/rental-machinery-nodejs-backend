@@ -9,29 +9,29 @@ exports.register = async (req, res) => {
         // Check if user already exists
         const existingUser = await User.findOne({ email });
         if (existingUser) {
-            return res.status(400).json({ message: 'Email already registered' });
+            return res.status(400).json({success:false, message: 'Email already registered' });
         }
 
         // Validate required fields
         if (!email || !password || !phone || !name) {
-            return res.status(400).json({ message: 'All fields are required' });
+            return res.status(400).json({success:false, message: 'All fields are required' });
         }
 
         // Validate phone number format
         const phoneRegex = /^\d{10}$/;
         if (!phoneRegex.test(phone)) {
-            return res.status(400).json({ message: 'Invalid phone number format' });
+            return res.status(400).json({ success:false,message: 'Invalid phone number format' });
         }
 
         // Validate email format
         const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
         if (!emailRegex.test(email)) {
-            return res.status(400).json({ message: 'Invalid email format' });
+            return res.status(400).json({ success:false,message: 'Invalid email format' });
         }
 
         // Validate password strength
         if (password.length < 6) {
-            return res.status(400).json({ message: 'Password must be at least 6 characters long' });
+            return res.status(400).json({success:false, message: 'Password must be at least 6 characters long' });
         }
 
         // Set default role if not provided
@@ -57,10 +57,10 @@ exports.register = async (req, res) => {
         const userObject = user.toObject();
         delete userObject.password;
 
-        res.status(201).json({ user: userObject, token });
+        res.status(201).json({ success:true,message:"user register successfully",data: userObject,token: token });
     } catch (error) {
         console.log(error.message);
-        res.status(400).json({ message: error.message });
+        res.status(400).json({ success:false,message: error.message });
     }
 };
 
@@ -70,18 +70,18 @@ exports.login = async (req, res) => {
 
         // Validate required fields
         if (!email || !password) {
-            return res.status(400).json({ message: 'Email and password are required' });
+            return res.status(400).json({success:false, message: 'Email and password are required' });
         }
 
         const user = await User.findOne({ email });
 
         if (!user) {
-            return res.status(401).json({ message: 'Invalid login credentials' });
+            return res.status(401).json({ success:false,message: 'Invalid login credentials' });
         }
 
         const isMatch = await bcrypt.compare(password, user.password);
         if (!isMatch) {
-            return res.status(401).json({ message: 'Invalid login credentials' });
+            return res.status(401).json({ success:false,message: 'Invalid login credentials' });
         }
 
         const token = jwt.sign({ _id: user._id }, process.env.JWT_SECRET, { expiresIn: '7d' });
@@ -90,9 +90,9 @@ exports.login = async (req, res) => {
         const userObject = user.toObject();
         delete userObject.password;
 
-        res.json({ user: userObject, token });
+        res.json({ success:true,message:"user login successfully",data: userObject,token: token });
     } catch (error) {
-        res.status(400).json({ message: error.message });
+        res.status(400).json({success:false, message: error.message });
     }
 };
 
@@ -104,7 +104,7 @@ exports.getProfile = async (req, res) => {
         
         res.json(userObject);
     } catch (error) {
-        res.status(400).json({ message: error.message });
+        res.status(400).json({ success:false, message: error.message });
     }
 };
 
@@ -120,14 +120,14 @@ exports.updateProfile = async (req, res) => {
         const isValidOperation = updates.every(update => allowedUpdates.includes(update));
 
         if (!isValidOperation) {
-            return res.status(400).json({ message: 'Invalid updates' });
+            return res.status(400).json({ success:false, message: 'Invalid updates' });
         }
 
         // Validate phone number if being updated
         if (req.body.phone) {
             const phoneRegex = /^\d{10}$/;
             if (!phoneRegex.test(req.body.phone)) {
-                return res.status(400).json({ message: 'Invalid phone number format' });
+                return res.status(400).json({success:false,  message: 'Invalid phone number format' });
             }
         }
 
@@ -138,9 +138,9 @@ exports.updateProfile = async (req, res) => {
         const userObject = req.user.toObject();
         delete userObject.password;
 
-        res.json(userObject);
+        res.json({success:true,message:"profile updated successfully", data:userObject});
     } catch (error) {
-        res.status(400).json({ message: error.message });
+        res.status(400).json({ success:false, message: error.message });
     }
 };
 
@@ -151,7 +151,7 @@ exports.addRole = async (req, res) => {
         // Validate role
         const validRoles = ['farmer', 'provider', 'shopkeeper', 'operator', 'admin', 'labour'];
         if (!validRoles.includes(role)) {
-            return res.status(400).json({ message: 'Invalid role' });
+            return res.status(400).json({success:false, message: 'Invalid role' });
         }
 
         // Add the role
@@ -183,9 +183,9 @@ exports.addRole = async (req, res) => {
         const userObject = req.user.toObject();
         delete userObject.password;
 
-        res.json(userObject);
+        res.json({success:true,message:"role added successfully",data:userObject});
     } catch (error) {
-        res.status(400).json({ message: error.message });
+        res.status(400).json({success:false, message: error.message });
     }
 };
 
@@ -195,13 +195,13 @@ exports.removeRole = async (req, res) => {
         
         // Prevent removing all roles
         if (req.user.roles.length <= 1) {
-            return res.status(400).json({ message: 'Cannot remove the only role' });
+            return res.status(400).json({success:false, message: 'Cannot remove the only role' });
         }
 
         // Validate role
         const validRoles = ['farmer', 'provider', 'shopkeeper', 'operator', 'admin', 'labour'];
         if (!validRoles.includes(role)) {
-            return res.status(400).json({ message: 'Invalid role' });
+            return res.status(400).json({ success:false,message: 'Invalid role' });
         }
 
         await req.user.removeRole(role);
@@ -210,16 +210,16 @@ exports.removeRole = async (req, res) => {
         const userObject = req.user.toObject();
         delete userObject.password;
 
-        res.json(userObject);
+        res.json({success:true,message:"role removed successfully",data:userObject});
     } catch (error) {
-        res.status(400).json({ message: error.message });
+        res.status(400).json({success:false, message: error.message });
     }
 };
 
 exports.updateLabourAvailability = async (req, res) => {
     try {
         if (!req.user.hasRole('labour')) {
-            return res.status(403).json({ message: 'User is not a labour' });
+            return res.status(403).json({success:false,  message: 'User is not a labour' });
         }
 
         const { availability, seasonalAvailability } = req.body;
@@ -238,9 +238,9 @@ exports.updateLabourAvailability = async (req, res) => {
         const userObject = req.user.toObject();
         delete userObject.password;
 
-        res.json(userObject);
+        res.json({success:true,message:"update labour availability successfully ",data:userObject});
     } catch (error) {
-        res.status(400).json({ message: error.message });
+        res.status(400).json({success:false,  message: error.message });
     }
 };
 
@@ -249,7 +249,7 @@ exports.logout = async (req, res) => {
         // In a more complex implementation, you might want to blacklist the token
         res.json({ message: 'Logged out successfully' });
     } catch (error) {
-        res.status(500).json({ message: error.message });
+        res.status(500).json({ success:false,message: error.message });
     }
 };
 
@@ -270,3 +270,23 @@ exports.checkAuth = async (req, res) => {
         });
     }
 };
+
+exports.updatePassword = async (req,res) => {
+    try{
+        const {newPass} = req.body;
+        const user = await User.findById(req.params.id);
+
+        if(!user){
+            res.json({success:false,message:"user not found!"});
+        }
+
+        user.password = newPass;
+        user.save();
+
+
+        res.json({success:true,message:"user password updated successfully",data:user});
+    }catch(err){
+        res.status(501).json({success:false,message:err.message});
+    }
+
+}

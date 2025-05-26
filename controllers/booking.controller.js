@@ -3,7 +3,7 @@ const Machinery = require('../models/machinery.model');
 
 exports.createBooking = async (req, res) => {
     try {
-        console.log(req.body);
+        // console.log(req.body);
         const machinery = await Machinery.findById(req.body.machinery);
         if (!machinery) {
             return res.status(404).json({ success: false, message: "Machinery not found" });
@@ -128,7 +128,7 @@ exports.deleteBooking = async (req, res) => {
 
         const diffInHours = (Date.now() - new Date(booking.createdAt).getTime()) / (1000 * 60 * 60);
         console.log(diffInHours);
-        if (diffInHours > 100) {
+        if (diffInHours > 10000) {
             return res.status(402).json({ success:false, message: "Time exceeded 1 hour from booking, so cannot cancel order." });
         }
 

@@ -23,8 +23,15 @@ const machinerySchema = new mongoose.Schema({
         type: Number,
         required: true
     },
-    images: [{
-        type: String
+    images:  [{
+        image: {
+            type: Number,
+            required: true
+        },
+        url: {
+            type: String,
+            required: true
+        }
     }],
     address :{
         type : String,
@@ -41,6 +48,11 @@ const machinerySchema = new mongoose.Schema({
     },
     location: {
         type: {
+            type: String,
+            enum: ['Point'],
+            required: true
+        },
+        address: {
             type: String,
             default: 'Point'
         },

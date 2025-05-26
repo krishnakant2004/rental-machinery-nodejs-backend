@@ -3,7 +3,7 @@ const User = require('../models/user.model');
 
 const auth = async (req, res, next) => {
     try {
-        console.log(req);
+        console.log(req.body);
         const authHeader = req.header('Authorization');
         
         if (!authHeader) {
@@ -20,7 +20,7 @@ const auth = async (req, res, next) => {
 
         const decoded = jwt.verify(token, process.env.JWT_SECRET);
         const user = await User.findOne({ _id: decoded._id });
-        console.log(user);
+        // console.log(user);
 
         if (!user) {
             return res.status(401).json({success:false,message: 'User not found'});

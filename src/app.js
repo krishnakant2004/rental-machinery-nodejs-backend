@@ -18,7 +18,7 @@ const app = express();
 app.use(cors());
 
 // Configure body parser with error handling
-app.use(bodyParser.json({ strict: false },{
+app.use(bodyParser.json({extended:true},{ strict: false },{
     verify: (req, res, buf, encoding) => {
         try {
             JSON.parse(buf);
@@ -31,6 +31,7 @@ app.use(bodyParser.json({ strict: false },{
 app.use(bodyParser.urlencoded({ extended: true }));
 
 
+app.use('/image/machinery', express.static('public/machinery'));
 // Routes
 app.use('/api/auth', authRoutes);
 app.use('/api/machinery', machineryRoutes);
@@ -47,6 +48,8 @@ app.use((err, req, res, next) => {
     res.status(500).json({ message: 'Something went wrong!' });
 });
 
+
+
 // Database connection
 mongoose.connect(process.env.MONGODB_URI, {
     useNewUrlParser: true,
@@ -55,7 +58,8 @@ mongoose.connect(process.env.MONGODB_URI, {
 .then(() => console.log('Connected to MongoDB'))
 .catch(err => console.error('MongoDB connection error:', err));
 
-const PORT = process.env.PORT || 3000;
-app.listen(PORT, () => {
+const PORT = process.env.PORT;
+
+app.listen(PORT,'0.0.0.0', () => {
     console.log(`Server is running on http://localhost:${PORT}`);
 });

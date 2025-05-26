@@ -8,7 +8,8 @@ router.get('/', machineryController.listMachinery);
 router.get('/:id', machineryController.getMachineryById);
 
 // Protected routes
-router.post('/', auth, machineryController.createMachinery);
+router.get('/provider/:providerId', machineryController.getMachineryByProviderId);
+router.post('/', auth, machineryController.addMachinery);
 router.put('/:id', auth, machineryController.updateMachinery);
 router.delete('/:id', auth, machineryController.deleteMachinery);
 
